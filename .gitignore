@@ -1,0 +1,30 @@
+@"
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs / temp
+*.log
+tmp/
+temp/
+
+# Node / Python (au cas où)
+node_modules/
+__pycache__/
+.venv/
+
+# Secrets
+.env
+*.pem
+*.key
+*.pfx
+secrets*.yaml
+
+# Helm packaging
+*.tgz
+
+# Kubernetes local generated
+kubeconfig*
+"@ | Set-Content -Encoding UTF8 .\.gitignore
