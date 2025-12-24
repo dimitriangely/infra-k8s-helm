@@ -1,0 +1,87 @@
+﻿apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sql-data-pvc
+  namespace: tp-prod
+  labels:
+    app: sql-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sql-data
+  namespace: tp-prod
+  labels:
+    app: sql-data
+spec:
+  type: ClusterIP
+  selector:
+    app: sql-data
+  ports:
+    - name: mssql
+      port: 1433
+      targetPort: 1433
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sql-data
+  namespace: tp-prod
+  labels:
+    app: sql-data
+spec:
+  serviceName: sql-data
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sql-data
+  template:
+    metadata:
+      labels:
+        app: sql-data
+    spec:
+      containers:
+        - name: mssql
+          image: tpfinal.azurecr.io/sql-data:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 1433
+              name: mssql
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sql-secrets
+                  key: SA_PASSWORD
+          volumeMounts:
+            - name: sql-data
+              mountPath: /var/opt/mssql
+          resources:
+            requests:
+              cpu: "4m"
+              memory: "500Mi"
+            limits:
+              cpu: "1"
+              memory: "2000Mi"
+          livenessProbe:
+            tcpSocket:
+              port: 1433
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 1433
+            initialDelaySeconds: 20
+            periodSeconds: 5
+      volumes:
+        - name: sql-data
+          persistentVolumeClaim:
+            claimName: sql-data-pvc
