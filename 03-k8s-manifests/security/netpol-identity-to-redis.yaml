@@ -1,0 +1,18 @@
+﻿apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-identity-to-redis
+  namespace: tp-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: identity-api
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: user-data
+      ports:
+        - protocol: TCP
+          port: 6379
