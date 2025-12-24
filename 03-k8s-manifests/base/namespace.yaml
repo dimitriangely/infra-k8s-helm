@@ -1,0 +1,7 @@
+﻿apiVersion: v1
+kind: Namespace
+metadata:
+  name: tp-prod
+  labels:
+    project: tp-k8s
+    env: prod
