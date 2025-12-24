@@ -1,0 +1,62 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobs-api
+  namespace: tp-prod
+  labels:
+    app: jobs-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: jobs-api
+  template:
+    metadata:
+      labels:
+        app: jobs-api
+    spec:
+      containers:
+        - name: jobs-api
+          image: tpfinal.azurecr.io/jobs-api:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: ConnectionString
+              value: "Server=sql-data;User=sa;Password=Pass@word;Database=dotnetgigs.jobs;"
+            - name: HostRabbitmq
+              value: "rabbitmq"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "500Mi"
+            limits:
+              cpu: "1"
+              memory: "1500Mi"
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jobs-api
+  namespace: tp-prod
+  labels:
+    app: jobs-api
+spec:
+  type: ClusterIP
+  selector:
+    app: jobs-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
