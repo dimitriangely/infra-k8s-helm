@@ -1,0 +1,31 @@
+﻿apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-identity
+  namespace: tp-prod
+  labels:
+    app: identity-api
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: role-identity-read
+  namespace: tp-prod
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rb-identity-read
+  namespace: tp-prod
+subjects:
+  - kind: ServiceAccount
+    name: sa-identity
+    namespace: tp-prod
+roleRef:
+  kind: Role
+  name: role-identity-read
+  apiGroup: rbac.authorization.k8s.io
