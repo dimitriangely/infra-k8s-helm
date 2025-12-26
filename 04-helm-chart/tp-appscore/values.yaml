@@ -1,0 +1,43 @@
+﻿global:
+  namespace: tp-prod
+  registry: tpfinal.azurecr.io
+  tag: "1.0.0"
+
+infra:
+  redis:
+    enabled: true
+    image: redis:7
+    servicePort: 6379
+    requests:
+      cpu: "4m"
+      memory: "500Mi"
+    limits:
+      cpu: "250m"
+      memory: "800Mi"
+
+  rabbitmq:
+    enabled: true
+    image: rabbitmq:3-management
+    servicePorts:
+      amqp: 5672
+      mgmt: 15672
+    requests:
+      cpu: "50m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "768Mi"
+
+  mssql:
+    enabled: true
+    imageName: sql-data
+    servicePort: 1433
+    pvcSize: 5Gi
+    acceptEula: "Y"
+    saPassword: "Pass@word"
+    requests:
+      cpu: "4m"
+      memory: "500Mi"
+    limits:
+      cpu: "1"
+      memory: "2000Mi"

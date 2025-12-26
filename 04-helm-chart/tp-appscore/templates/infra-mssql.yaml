@@ -1,0 +1,98 @@
+﻿{{- if .Values.infra.mssql.enabled }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sql-secrets
+  namespace: {{ include "tp.ns" . }}
+type: Opaque
+stringData:
+  SA_PASSWORD: {{ .Values.infra.mssql.saPassword | quote }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sql-data-pvc
+  namespace: {{ include "tp.ns" . }}
+  labels:
+    app: sql-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.infra.mssql.pvcSize | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sql-data
+  namespace: {{ include "tp.ns" . }}
+  labels:
+    app: sql-data
+spec:
+  type: ClusterIP
+  selector:
+    app: sql-data
+  ports:
+    - name: mssql
+      port: {{ .Values.infra.mssql.servicePort }}
+      targetPort: {{ .Values.infra.mssql.servicePort }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sql-data
+  namespace: {{ include "tp.ns" . }}
+  labels:
+    app: sql-data
+spec:
+  serviceName: sql-data
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sql-data
+  template:
+    metadata:
+      labels:
+        app: sql-data
+    spec:
+      containers:
+        - name: mssql
+          image: {{ .Values.global.registry }}/{{ .Values.infra.mssql.imageName }}:{{ .Values.global.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.infra.mssql.servicePort }}
+              name: mssql
+          env:
+            - name: ACCEPT_EULA
+              value: {{ .Values.infra.mssql.acceptEula | quote }}
+            - name: SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sql-secrets
+                  key: SA_PASSWORD
+          volumeMounts:
+            - name: sql-data
+              mountPath: /var/opt/mssql
+          resources:
+            requests:
+              cpu: {{ .Values.infra.mssql.requests.cpu | quote }}
+              memory: {{ .Values.infra.mssql.requests.memory | quote }}
+            limits:
+              cpu: {{ .Values.infra.mssql.limits.cpu | quote }}
+              memory: {{ .Values.infra.mssql.limits.memory | quote }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.infra.mssql.servicePort }}
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.infra.mssql.servicePort }}
+            initialDelaySeconds: 20
+            periodSeconds: 5
+      volumes:
+        - name: sql-data
+          persistentVolumeClaim:
+            claimName: sql-data-pvc
+{{- end }}
