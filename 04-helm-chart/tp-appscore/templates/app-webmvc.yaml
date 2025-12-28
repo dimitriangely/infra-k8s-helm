@@ -1,0 +1,78 @@
+﻿{{- if .Values.apps.enabled }}
+{{- if .Values.apps.webmvc.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.apps.webmvc.name }}
+  namespace: {{ include "tp.ns" . }}
+  labels:
+    app: {{ .Values.apps.webmvc.name }}
+spec:
+  replicas: {{ .Values.apps.webmvc.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.apps.webmvc.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.apps.webmvc.name }}
+    spec:
+      {{- if .Values.apps.webmvc.affinity.enabled }}
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 80
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: jobs-api
+                topologyKey: kubernetes.io/hostname
+            - weight: 80
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: applicants-api
+                topologyKey: kubernetes.io/hostname
+      {{- end }}
+      containers:
+        - name: {{ .Values.apps.webmvc.name }}
+          image: {{ .Values.global.registry }}/{{ .Values.apps.webmvc.imageName }}:{{ .Values.global.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.apps.webmvc.containerPort }}
+              name: http
+          resources:
+            requests:
+              cpu: {{ .Values.apps.webmvc.requests.cpu | quote }}
+              memory: {{ .Values.apps.webmvc.requests.memory | quote }}
+            limits:
+              cpu: {{ .Values.apps.webmvc.limits.cpu | quote }}
+              memory: {{ .Values.apps.webmvc.limits.memory | quote }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.apps.webmvc.containerPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.apps.webmvc.containerPort }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.apps.webmvc.name }}
+  namespace: {{ include "tp.ns" . }}
+  labels:
+    app: {{ .Values.apps.webmvc.name }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.apps.webmvc.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: {{ .Values.apps.webmvc.containerPort }}
+{{- end }}
+{{- end }}

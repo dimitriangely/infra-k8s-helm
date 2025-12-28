@@ -1,0 +1,66 @@
+﻿{{- if .Values.apps.enabled }}
+{{- if .Values.apps.applicantsApi.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.apps.applicantsApi.name }}
+  namespace: {{ include "tp.ns" . }}
+  labels:
+    app: {{ .Values.apps.applicantsApi.name }}
+spec:
+  replicas: {{ .Values.apps.applicantsApi.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.apps.applicantsApi.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.apps.applicantsApi.name }}
+    spec:
+      containers:
+        - name: {{ .Values.apps.applicantsApi.name }}
+          image: {{ .Values.global.registry }}/{{ .Values.apps.applicantsApi.imageName }}:{{ .Values.global.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.apps.applicantsApi.containerPort }}
+              name: http
+          env:
+            - name: HostRabbitmq
+              value: {{ .Values.apps.applicantsApi.env.hostRabbitmq | quote }}
+            - name: ConnectionString
+              value: {{ printf "Server=sql-data;User=sa;Password=%s;Database=%s;" .Values.infra.mssql.saPassword .Values.apps.applicantsApi.env.database | quote }}
+          resources:
+            requests:
+              cpu: {{ .Values.apps.applicantsApi.requests.cpu | quote }}
+              memory: {{ .Values.apps.applicantsApi.requests.memory | quote }}
+            limits:
+              cpu: {{ .Values.apps.applicantsApi.limits.cpu | quote }}
+              memory: {{ .Values.apps.applicantsApi.limits.memory | quote }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.apps.applicantsApi.containerPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.apps.applicantsApi.containerPort }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.apps.applicantsApi.name }}
+  namespace: {{ include "tp.ns" . }}
+  labels:
+    app: {{ .Values.apps.applicantsApi.name }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.apps.applicantsApi.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: {{ .Values.apps.applicantsApi.containerPort }}
+{{- end }}
+{{- end }}

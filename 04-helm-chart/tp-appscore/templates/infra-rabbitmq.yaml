@@ -1,4 +1,4 @@
-﻿{{- if .Values.infra.rabbitmq.enabled }}
+﻿{{- if .Values.infra.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

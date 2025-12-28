@@ -34,10 +34,87 @@ infra:
     servicePort: 1433
     pvcSize: 5Gi
     acceptEula: "Y"
-    saPassword: "Pass@word"
+    saPassword: "ChangeMe!"
     requests:
       cpu: "4m"
       memory: "500Mi"
     limits:
       cpu: "1"
       memory: "2000Mi"
+
+apps:
+  applicantsApi:
+    enabled: true
+    name: applicants-api
+    imageName: applicants-api
+    replicas: 2
+    containerPort: 80
+    env:
+      hostRabbitmq: rabbitmq
+      database: dotnetgigs.applicants
+    requests:
+      cpu: "500m"
+      memory: "500Mi"
+    limits:
+      cpu: "1"
+      memory: "1500Mi"
+
+  jobsApi:
+    enabled: true
+    name: jobs-api
+    imageName: jobs-api
+    replicas: 2
+    containerPort: 80
+    env:
+      hostRabbitmq: rabbitmq
+      database: dotnetgigs.jobs
+    requests:
+      cpu: "500m"
+      memory: "500Mi"
+    limits:
+      cpu: "1"
+      memory: "1500Mi"
+
+  identityApi:
+    enabled: true
+    name: identity-api
+    imageName: identity-api
+    replicas: 2
+    containerPort: 80
+    env:
+      hostRabbitmq: rabbitmq
+      redisHost: user-data:6379
+    requests:
+      cpu: "500m"
+      memory: "500Mi"
+    limits:
+      cpu: "1"
+      memory: "1500Mi"
+
+  webmvc:
+    enabled: true
+    name: webmvc
+    imageName: webmvc
+    replicas: 2
+    containerPort: 80
+    requests:
+      cpu: "4m"
+      memory: "900Mi"
+    limits:
+      cpu: "1"
+      memory: "2000Mi"
+    affinity:
+      enabled: true
+
+  hpa:
+    enabled: true
+    targetDeployment: webmvc
+    minReplicas: 2
+    maxReplicas: 6
+    cpuUtilization: 60
+
+  ingress:
+    enabled: true
+    className: nginx
+    host: tp.local
+    tlsSecret: tp-local-tls
