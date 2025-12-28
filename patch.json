@@ -1,0 +1,28 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "affinity": {
+          "podAffinity": {
+            "preferredDuringSchedulingIgnoredDuringExecution": [
+              {
+                "weight": 80,
+                "podAffinityTerm": {
+                  "labelSelector": { "matchLabels": { "app": "jobs-api" } },
+                  "topologyKey": "kubernetes.io/hostname"
+                }
+              },
+              {
+                "weight": 80,
+                "podAffinityTerm": {
+                  "labelSelector": { "matchLabels": { "app": "applicants-api" } },
+                  "topologyKey": "kubernetes.io/hostname"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

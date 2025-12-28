@@ -1,0 +1,20 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "name": "metrics-server",
+            "args": [
+              "--cert-dir=/tmp",
+              "--secure-port=4443",
+              "--kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP",
+              "--kubelet-insecure-tls",
+              "--metric-resolution=15s"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
