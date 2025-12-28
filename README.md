@@ -197,76 +197,8 @@ illustrer la scalabilité et l’observabilité
 
 simuler un environnement DevOps réel
 
-flowchart TB
-  %% ====== EXTERNE ======
-  U[Utilisateur / Navigateur] -->|HTTPS :443| DNS[DNS / Hosts\n(tp.local)]
-  DNS -->|HTTPS :443| INGRESS[Ingress NGINX\n(webmvc-ingress)]
+2) Explication simple 
 
-  %% ====== CLUSTER ======
-  subgraph K8s[Cluster Kubernetes]
-    direction TB
-
-    %% Namespace
-    subgraph NS[Namespace : tp-prod]
-      direction TB
-
-      %% Ingress -> Service Web
-      INGRESS -->|HTTP :80| SVC_WEB[Service ClusterIP\nwebmvc:80]
-      SVC_WEB --> WEB[Deployment webmvc\n(2+ replicas, HPA)]
-
-      %% Web -> APIs
-      WEB -->|HTTP :80| SVC_JOBS[Service ClusterIP\njobs-api:80]
-      WEB -->|HTTP :80| SVC_APPS[Service ClusterIP\napplicants-api:80]
-      WEB -->|HTTP :80| SVC_ID[Service ClusterIP\nidentity-api:80]
-
-      SVC_JOBS --> JOBS[Deployment jobs-api]
-      SVC_APPS --> APPS[Deployment applicants-api]
-      SVC_ID --> ID[Deployment identity-api]
-
-      %% APIs -> infra dependencies
-      JOBS -->|TCP :1433| SQLSVC[Service ClusterIP\nsql-data:1433]
-      APPS -->|TCP :1433| SQLSVC
-      ID -->|TCP :1433| SQLSVC
-
-      JOBS -->|TCP :5672| MQSVC[Service ClusterIP\nrabbitmq:5672]
-      APPS -->|TCP :5672| MQSVC
-      ID -->|TCP :5672| MQSVC
-
-      JOBS -->|TCP :6379| REDISSVC[Service ClusterIP\nuser-data(redis):6379]
-      APPS -->|TCP :6379| REDISSVC
-      ID -->|TCP :6379| REDISSVC
-
-      %% Stateful backends
-      SQLSVC --> SQL[(StatefulSet sql-data)]
-      MQSVC --> MQ[(Deployment/Stateful RabbitMQ)]
-      REDISSVC --> REDIS[(Deployment Redis)]
-
-      %% HPA / Metrics
-      HPA[HPA webmvc] --> WEB
-      MS[metrics-server] --> HPA
-
-    end
-  end
-
-  %% ====== OBSERVABILITE / LOGGING (optionnel selon ton setup) ======
-  subgraph Obs[Observabilité / Logging]
-    direction TB
-    PROM[Prometheus] --> GRAF[Grafana]
-    FB[Fluent Bit DaemonSet] --> ES[Elasticsearch]
-    ES --> KIB[Kibana]
-  end
-
-  %% logs flux
-  WEB -. stdout/stderr logs .-> FB
-  JOBS -. logs .-> FB
-  APPS -. logs .-> FB
-  ID -. logs .-> FB
-
-  %% metrics flux
-  MS -. metrics .-> PROM
-  PROM -. dashboards .-> GRAF
-
-2) Lecture rapide du schéma (ce que ça raconte)
 Flux externe
 
 Utilisateur → https://tp.local → Ingress NGINX → Service webmvc → Pods webmvc
@@ -281,7 +213,7 @@ applicants-api.tp-prod.svc.cluster.local:80
 
 identity-api.tp-prod.svc.cluster.local:80
 
-Dépendances infra (toujours internes)
+Dépendances infra (Toujours Flux internes)
 
 Les APIs consomment :
 
@@ -293,7 +225,7 @@ Redis via user-data:6379
 
 Observabilité
 
-HPA se base sur metrics-server (CPU % des requests)
+HPA-ou-HorizontalPodsAutoscaler se base sur metrics-server (CPU % des requests)
 
 Fluent Bit collecte les logs des pods et envoie vers Elasticsearch, visualisable dans Kibana
 
