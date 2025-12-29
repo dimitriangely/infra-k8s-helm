@@ -94,7 +94,7 @@ Objet Kubernetes utilisé pour stocker des configurations non sensibles (fichier
 
 ---
 
-### service discovery Kubernetes
+### Service discovery Kubernetes
 Dans Kubernetes, la découverte de services permet aux composants d'une application situés dans des conteneurs ou des pods distincts de communiquer sans connaître leurs adresses IP.
 
 ---
@@ -256,13 +256,8 @@ Processus visant à rendre les déploiements fiables, reproductibles et automati
 
 ---
 
-### Source de vérité
-Élément unique faisant autorité pour décrire l’état souhaité de l’infrastructure (ex : Helm + Git).
-
----
-
 ### GitOps
-Méthode de gestion de l’infrastructure où Git est la source de vérité, et les changements sont appliqués automatiquement au cluster.
+Méthode de gestion de l’infrastructure : https://www.redhat.com/fr/topics/devops/what-is-gitops.
 
 ---
 
