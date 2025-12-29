@@ -1,0 +1,65 @@
+#version: '3.9' uniquement pour moteur docker compose v1
+
+networks:
+  backend:
+    name: back-network
+    external: false
+  frontend:
+    name: front-network
+
+volumes:
+  mysql_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: D:\docker\data\mysql_data
+
+services:
+  database:
+    container_name: mysql-cont
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=${ROOT_PWD}
+      - MYSQL_USER=${WP_USER}
+      - MYSQL_PASSWORD=${WP_PASSWORD}
+      - MYSQL_DATABASE=${WP_DB}
+    restart: always
+    networks:
+      - backend
+    volumes:
+      - mysql_data:/var/lib/mysql
+    #  - D:\docker\data\mysql_data:/var/lib/myqsl
+
+
+  myadmin:
+    container_name: myadmin-cont
+    image: phpmyadmin:latest
+    environment:
+      - PMA_HOST=database
+    restart: always
+    ports:
+      - 8080:80
+    depends_on:
+      - database
+    networks:
+      - frontend
+      - backend
+  
+  wordpress:
+    container_name: wp-cont
+    image: wordpress:latest
+    ports:
+      - 80:80
+    environment:
+      - WORDPRESS_DB_HOST=database
+      - WORDPRESS_DB_NAME=${WP_DB}
+      - WORDPRESS_DB_USER=${WP_USER}
+      - WORDPRESS_DB_PASSWORD=${WP_PASSWORD}
+    depends_on:
+      - database
+    networks:
+      - frontend
+      - backend
+
+    

@@ -1,0 +1,44 @@
+
+#deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpmyadmin-dep
+  namespace: word
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phpmyadmin
+  template:
+    metadata:
+      name: phpmyadmin-pod
+      namespace: myadmin
+      labels: 
+        app: phpmyadmin
+    spec:
+      containers:
+      - name: phpmyadmin-cont
+        image: phpmyadmin:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: PMA_HOST
+          value: mysql-serv
+        - name: PMA_ABSOLUTE_URI
+          value: http://localhost/myadmin
+---
+#service
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin-serv
+  namespace: word
+spec:
+  selector:
+    app: phpmyadmin
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP

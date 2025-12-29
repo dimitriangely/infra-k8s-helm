@@ -1,0 +1,55 @@
+
+#deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-dep
+  namespace: word
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      name: mysql-pod
+      namespace: word
+      labels: 
+        app: mysql
+    spec:
+      containers:
+      - name: mysql-cont
+        image: mysql:latest
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: toto
+        - name: MYSQL_DATABASE
+          value: db_test
+        - name: MYSQL_USER
+          value: bob
+        - name: MYSQL_PASSWORD
+          value: toto
+#        volumeMounts:
+#        - name: mysql-storage
+#          mountPath: /var/lib/mysql
+#      volumes:
+#      - name: mysql-storage
+#        persistentVolumeClaim: 
+#          claimName: mysql-pvc
+---
+#service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-serv
+  namespace: word
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP

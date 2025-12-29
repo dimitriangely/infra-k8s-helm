@@ -1,0 +1,25 @@
+TP Avancé Docker Compose : Déploiement d'une Application Multi-Services
+
+Contexte :
+Votre entreprise souhaite mettre en place une application web composée de plusieurs services indépendants. Vous devez orchestrer ces services à l'aide de Docker Compose pour faciliter le déploiement.
+
+L'application se compose de :
+Frontend : Une application React. (dossier front)
+Backend : Une API REST développée en Node.js/Express. (dossier back)
+Base de données : Une instance PostgreSQL.
+Proxy inversé : Un serveur Nginx pour distribuer les requêtes entre le frontend et le backend.
+
+Étape 1 : Préparer les images des applications
+Étape 2 : Préparer l'image pour le reverse proxy (nginx)
+Étape 3 : Créer le fichier docker-compose.yml
+Étape 4 : Démarrage et tests
+
+Les URLs d'accès sont les suivantes:
+- Accès au frontend via http://localhost:80
+- Accès à l'API via http://localhost:80/api1
+- Accès à l'API via http://localhost:80/api2
+
+Rendu: 
+- docker-compose.yml
+- les dockerfiles
+(dans un zip)

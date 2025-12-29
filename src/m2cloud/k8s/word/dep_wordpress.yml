@@ -1,0 +1,54 @@
+
+#deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-dep
+  namespace: word
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: wordpress
+  template:
+    metadata:
+      name: wordpress-pod
+      namespace: word
+      labels: 
+        app: wordpress
+    spec:
+      containers:
+      - name: wordpress-cont
+        image: wordpress:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: mysql-serv
+        - name: WORDPRESS_DB_USER
+          value: bob
+        - name: WORDPRESS_DB_PASSWORD
+          value: toto
+        - name: WORDPRESS_DB_NAME
+          value: db_test
+#        - name: WORDPRESS_CONFIG_EXTRA
+#          value: |
+#            define('DOMAIN_CURRENT_SITE', 'localhost');
+#            define('PATH_CURRENT_SITE', '/wordpress');
+#            define('WP_HOME', 'http://localhost/');
+#            define('WP_SITEURL', 'http://localhost/');
+---
+#service
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-serv
+  namespace: word
+spec:
+  selector:
+    app: wordpress
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP

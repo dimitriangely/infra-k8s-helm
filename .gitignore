@@ -30,7 +30,7 @@ kubeconfig*
 "@ | Set-Content -Encoding UTF8 .\.gitignore
 
 # Course sources
-src/
+#src/
 
 
 # TLS keys

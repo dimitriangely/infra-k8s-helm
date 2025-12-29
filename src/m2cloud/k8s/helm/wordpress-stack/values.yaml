@@ -1,0 +1,31 @@
+mysql:
+  replicas: 1
+
+  image:
+    repository: mysql
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 3306
+
+  auth:
+    rootPassword: "toto"
+    database: "db_test"
+    username: "bob"
+    password: "toto"
+
+  persistence:
+    enabled: false
+    
+wordpress:
+  replicas: 3
+  image:
+    repository: wordpress
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  configExtra: ""

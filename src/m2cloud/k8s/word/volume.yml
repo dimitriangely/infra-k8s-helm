@@ -1,0 +1,42 @@
+# dans un namespace "word"
+# deploiement de 1 pod d'une base de données mysql (attention, on parle d'une base de données!!!!!!)
+# deploiement de 3 pods wordpress
+# deploiement de 1 pod avec un phpmyadmin
+# service d'accès à mysql interne au cluster
+# service d'accès à l'application wordpress depuis l'extérieur port 80
+# service d'accès à l'application phpmyadmin depuis l'extérieur port 8080
+# service d'ingress (avec ingress) pour répartir les routes
+# - http://localhost/ => service wordpress
+# - http://localhost/phpmyadmin => service phpmyadmin
+# Attention, vous devrez changer le type des services wordpress et phpmyadmin
+
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "D:/data/mysql_data"
+  #storageClassName: manual
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: word
+  name: mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: mysql-pv
+  storageClassName: docker-sc
