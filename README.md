@@ -46,7 +46,7 @@ illustrer la scalabilité et l’observabilité
 
 simuler un environnement DevOps réel
 
-2) Explication simple 
+Explication simple 
 
 Flux externe
 
